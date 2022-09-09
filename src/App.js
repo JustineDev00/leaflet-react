@@ -76,83 +76,8 @@ function App() {
 
 
 
-  // const [displayedMarkers, setDisplayedMarkers] = useStateWithCallback(
-
-  //   //initial state
-  //   {
-  //   activeCollectionID: 1,
-  //   selectedCollection : objectCollection1,
-  //   showMarkers : mapLocationsArray(objectCollection1)},
-
-
-  //   //callback effect
-  //   displayedMarkers => {
-  //     switch (displayedMarkers.activeCollectionID) {
-  //       case 1:
-  //         setDisplayedMarkers(prevValues => {
-  //           return {...prevValues, selectedCollection : objectCollection1, showMarkers : mapLocationsArray(objectCollection1)}
-  //         })
-  //         break;
-  //       case 2:
-  //         setDisplayedMarkers(...prevValues => {
-  //           return {... prevValues, selectedCollection : objectCollection2, showMarkers : mapLocationsArray(objectCollection2)}
-  //         })
-  //         break;
-  //       default:
-  //         break;
-  //     }
-
-  //   });
-
-  const [activeCollectionID, setActiveCollectionID] = useState(1);
-
-
-  const initMarkers = {
-    selectedCollection: objectCollection1,
-    showMarkers: mapLocationsArray(objectCollection1),
-  }
-
-
-  const [displayedMarkers, setDisplayedMarkers] = useState(initMarkers);
-
-  // const [selectedCollection, setSelectedCollection] = useState(null);
-  // const [showMarkers, setShowMarkers] = useState(null);
-
-  // const [activeCollectionID, setActiveCollectionID] = useState(null);
-
-  function handleValueChange(e) {
-    setActiveCollectionID(e.target.value);
-    console.log(`event triggered ${activeCollectionID}`);
-  }
-
-  useEffect(() => {
-    setDisplayedMarkers( () => {
-      switch (activeCollectionID) {
-        case 1:
-          displayedMarkers.selectedCollection = objectCollection1;
-          displayedMarkers.showMarkers = mapLocationsArray(objectCollection1);
-          break;
-        case 2:
-          displayedMarkers.selectedCollection = objectCollection2;
-          displayedMarkers.showMarkers = mapLocationsArray(objectCollection2);
-          break;
-        default:
-          break;
-      }
-    }
-    )
-
-  }, [activeCollectionID])
-
-
-
+ 
   // !! ne passer uniquement que des variables d'état (states) en dépendances de useEffect()
-
-
-
-
-
-
 
   const objectAsJSX = objectCollection1.map(elt => <CustMarker key={elt.id} name={elt.name} position={elt.position} description={elt.description} isVisited={elt.isVisited}></CustMarker>)
 
@@ -178,16 +103,12 @@ function App() {
     <div className="App">
       <InputSelect handleValueChange={handleValueChange} />
       <MapContainer center={
-
-        displayedMarkers ? displayedMarkers.selectedCollection.find(elt => elt.id === 1).position :
           originalCenter} zoom={15} scrollWheelZoom={false} className='leaflet-wrapper'>
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-
         <LocationMarker />
-        {displayedMarkers.showMarkers}
       </MapContainer>
 
 
