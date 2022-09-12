@@ -5,14 +5,14 @@ import { MapContainer, Marker, Popup, useMapEvent, useMapEvents } from 'react-le
 import { TileLayer } from 'react-leaflet';
 import { useMap } from 'react-leaflet';
 import { map } from 'leaflet';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import CustMarker from './Marker/Marker';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle';
 import InputSelect from './InputSelect/InputSelect';
 import useStateWithCallback from 'use-state-with-callback';
 import Button from './Button/Button';
-
+import { flushSync } from 'react-dom';
 
 
 
@@ -88,11 +88,11 @@ function App() {
 
 
   const extraLocation = {
-    id : '',
-    nom : 'collège des Bernardins',
+    id : 4,
+    name : 'collège des Bernardins',
     description : `Résidence des moines cisterciens étudiants à l'université de Paris du XIIIe siècle à la Révolution Française`,
-    position : [48.84886516046273, 2.3520445289133405]
-
+    position : [48.84886516046273, 2.3520445289133405],
+    isVisited : true
   }
 
 
@@ -139,7 +139,7 @@ function App() {
   const [currentMarkers, setCurrentMarkers] = useState([]);
   const [currentMapCenter, setCurrentMapCenter] = useState(originalCenter.slice());
   const [arrayOfLocations1, setArrayofLocations1] = useState(objectCollection1.slice());
-  const [arrayOfLocations2, setArrayofLocations2] = useState(objectCollection2.slice());
+  const arrayOfLocations2 = useRef(objectCollection2.slice());
 
 
 
@@ -165,7 +165,7 @@ function App() {
         setCurrentLocationList(arrayOfLocations1.slice());
         break;
         case '2':
-          setCurrentLocationList(arrayOfLocations2.slice());
+          setCurrentLocationList(arrayOfLocations2.current.slice());
           break;
       default:
         break;
@@ -186,31 +186,28 @@ function App() {
 //ajoute ou retire le lieu supp de la deuxieme liste 
 
   function addOrRemoveLocation() {
-    const copyOf2 = arrayOfLocations2.slice();
-    const newLocation = extraLocation;
-    if(extraLocation.id === ''){
-      const index = extraLocation.length;
-      newLocation.id = index;
-      copyOf2.push(newLocation);
-      setArrayofLocations2(copyOf2);
+    const copyOf2 = arrayOfLocations2.current.slice();
+    let array = []
+    const index = copyOf2.indexOf(copyOf2.find(elt => elt.id === extraLocation.id));
+    if(index === -1){
+    copyOf2.push(extraLocation);
     }
     else{
-     const index =  copyOf2.findIndex(elt => elt.id === extraLocation.id);
-     if(index != -1){
       copyOf2.splice(index, 1);
-      setArrayofLocations2(copyOf2);
-
-     }
-
     }
-
-
+    array = copyOf2;
+    arrayOfLocations2.current = array;
+    
+  
+    setCurrentMapCenter(extraLocation.position);
+    setCurrentLocationList(arrayOfLocations2.current);
   }
 
   return (
     <div className="App">
       <InputSelect handleValueChange={handleValueChange} />
       <span><Button onClick={visitMonument} id={1} texte='ajout colonne dans visités'/></span>
+      <span><Button onClick={addOrRemoveLocation}  texte='ajout lieu bonus dans liste 2'/></span>
       <MapContainer center={
         currentMapCenter} zoom={15} scrollWheelZoom={false} className='leaflet-wrapper'>
         <TileLayer
