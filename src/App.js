@@ -65,19 +65,29 @@ function App() {
   },
   ]
 
-
+  function getLocationListCenter(locationArray) {
+    if(locationArray.length === 0){
+      return;
+    }
+    else{
+      const center = locationArray.find(elt => elt.id === 1).position;
+      return center;
+    }}
 
   function mapLocationsArray(locationArray) {
-    const mappedArray = locationArray.map(elt => <CustMarker key={elt.id} name={elt.name} position={elt.position} description={elt.description} isVisited={elt.isVisited}></CustMarker>);
-    return (
-      mappedArray
-    );
+    if (locationArray.length === 0) {
+      return;
+
+    }
+    else {
+      const mappedArray = locationArray.map(elt => <CustMarker key={elt.id} name={elt.name} position={elt.position} description={elt.description} isVisited={elt.isVisited}></CustMarker>);
+      return (mappedArray);
+    }
+
   }
 
 
 
- 
-  // !! ne passer uniquement que des variables d'état (states) en dépendances de useEffect()
 
   const objectAsJSX = objectCollection1.map(elt => <CustMarker key={elt.id} name={elt.name} position={elt.position} description={elt.description} isVisited={elt.isVisited}></CustMarker>)
 
@@ -99,16 +109,53 @@ function App() {
     )
   }
 
+  const [currentLocationList, setCurrentLocationList] = useState([]);
+  const [currentMarkers, setCurrentMarkers] = useState([]);
+  const [currentMapCenter, setCurrentMapCenter] = useState(originalCenter.slice());
+
+
+
+  useEffect(() => {
+    // let locationArray = [];
+    // locationArray = objectCollection1;
+    
+    setCurrentMarkers(mapLocationsArray(currentLocationList));
+    setCurrentMapCenter(getLocationListCenter(currentLocationList));
+  },[currentLocationList]);
+
+  function handleValueChange(e) {
+    console.log(`current locationlist id = ${e.target.value}`);
+    switch (e.target.value) {
+      case '1':
+        setCurrentLocationList(objectCollection1.slice());
+        break;
+        case '2':
+          setCurrentLocationList(objectCollection2.slice());
+          break;
+      default:
+        break;
+    }
+
+  }
+
+
+
+
+
+
+
+
   return (
     <div className="App">
       <InputSelect handleValueChange={handleValueChange} />
       <MapContainer center={
-          originalCenter} zoom={15} scrollWheelZoom={false} className='leaflet-wrapper'>
+        originalCenter} zoom={15} scrollWheelZoom={false} className='leaflet-wrapper'>
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         <LocationMarker />
+        {currentMarkers}
       </MapContainer>
 
 
