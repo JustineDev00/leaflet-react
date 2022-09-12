@@ -1,7 +1,7 @@
 // import '../node_modules/leaflet/dist/leaflet.css'
 // import '../node_modules/leaflet/dist/leaflet'
 import './App.css';
-import { MapContainer, Marker, Popup, useMapEvents } from 'react-leaflet';
+import { MapContainer, Marker, Popup, useMapEvent, useMapEvents } from 'react-leaflet';
 import { TileLayer } from 'react-leaflet';
 import { useMap } from 'react-leaflet';
 import { map } from 'leaflet';
@@ -14,8 +14,27 @@ import useStateWithCallback from 'use-state-with-callback';
 
 
 
+
 function App() {
+
   const originalCenter = [51.505, -0.09];
+ 
+ 
+ 
+ 
+  function FlyTo({latlng}){
+    const map = useMap();
+    if(currentMapCenter == null){
+      map.flyTo(originalCenter);
+    }
+    else{
+      map.flyTo(latlng);
+      return;
+    }
+  }
+
+
+
 
   //liste des objets-lieux
   const objectCollection1 = [
@@ -87,11 +106,6 @@ function App() {
   }
 
 
-
-
-  const objectAsJSX = objectCollection1.map(elt => <CustMarker key={elt.id} name={elt.name} position={elt.position} description={elt.description} isVisited={elt.isVisited}></CustMarker>)
-
-
   function LocationMarker() {
     const [position, setPosition] = useState(null)
     const map = useMapEvents({
@@ -121,7 +135,12 @@ function App() {
     
     setCurrentMarkers(mapLocationsArray(currentLocationList));
     setCurrentMapCenter(getLocationListCenter(currentLocationList));
+    
+
   },[currentLocationList]);
+
+
+
 
   function handleValueChange(e) {
     console.log(`current locationlist id = ${e.target.value}`);
@@ -135,27 +154,24 @@ function App() {
       default:
         break;
     }
+  
 
   }
-
-
-
-
-
-
 
 
   return (
     <div className="App">
       <InputSelect handleValueChange={handleValueChange} />
       <MapContainer center={
-        originalCenter} zoom={15} scrollWheelZoom={false} className='leaflet-wrapper'>
+        currentMapCenter} zoom={15} scrollWheelZoom={false} className='leaflet-wrapper'>
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
+        <FlyTo latlng={currentMapCenter} />
         <LocationMarker />
         {currentMarkers}
+        
       </MapContainer>
 
 
