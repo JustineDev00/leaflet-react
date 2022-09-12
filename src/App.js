@@ -1,7 +1,7 @@
 // import '../node_modules/leaflet/dist/leaflet.css'
 // import '../node_modules/leaflet/dist/leaflet'
 import './App.css';
-import { MapContainer, Marker, Popup, useMapEvents } from 'react-leaflet';
+import { MapContainer, Marker, Popup, useMapEvent, useMapEvents } from 'react-leaflet';
 import { TileLayer } from 'react-leaflet';
 import { useMap } from 'react-leaflet';
 import { map } from 'leaflet';
@@ -11,11 +11,31 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle';
 import InputSelect from './InputSelect/InputSelect';
 import useStateWithCallback from 'use-state-with-callback';
+import Button from './Button/Button';
+
 
 
 
 function App() {
+
   const originalCenter = [51.505, -0.09];
+ 
+ 
+ 
+ 
+  function FlyTo({latlng}){
+    const map = useMap();
+    if(currentMapCenter == null){
+      map.flyTo(originalCenter);
+    }
+    else{
+      map.flyTo(latlng);
+      return;
+    }
+  }
+
+
+
 
   //liste des objets-lieux
   const objectCollection1 = [
@@ -65,6 +85,16 @@ function App() {
   },
   ]
 
+
+  const extraLocation = {
+    id : '',
+    nom : 'collège des Bernardins',
+    description : `Résidence des moines cisterciens étudiants à l'université de Paris du XIIIe siècle à la Révolution Française`,
+    position : [48.84886516046273, 2.3520445289133405]
+
+  }
+
+
   function getLocationListCenter(locationArray) {
     if(locationArray.length === 0){
       return;
@@ -87,11 +117,6 @@ function App() {
   }
 
 
-
-
-  const objectAsJSX = objectCollection1.map(elt => <CustMarker key={elt.id} name={elt.name} position={elt.position} description={elt.description} isVisited={elt.isVisited}></CustMarker>)
-
-
   function LocationMarker() {
     const [position, setPosition] = useState(null)
     const map = useMapEvents({
@@ -112,6 +137,10 @@ function App() {
   const [currentLocationList, setCurrentLocationList] = useState([]);
   const [currentMarkers, setCurrentMarkers] = useState([]);
   const [currentMapCenter, setCurrentMapCenter] = useState(originalCenter.slice());
+  const [arrayOfLocations1, setArrayofLocations1] = useState(objectCollection1.slice());
+  const [arrayOfLocations2, setArrayofLocations2] = useState(objectCollection2.slice());
+
+
 
 
 
@@ -121,41 +150,76 @@ function App() {
     
     setCurrentMarkers(mapLocationsArray(currentLocationList));
     setCurrentMapCenter(getLocationListCenter(currentLocationList));
+    
+
   },[currentLocationList]);
+
+
+
 
   function handleValueChange(e) {
     console.log(`current locationlist id = ${e.target.value}`);
     switch (e.target.value) {
       case '1':
-        setCurrentLocationList(objectCollection1.slice());
+        setCurrentLocationList(arrayOfLocations1.slice());
         break;
         case '2':
-          setCurrentLocationList(objectCollection2.slice());
+          setCurrentLocationList(arrayOfLocations2.slice());
           break;
       default:
         break;
     }
+  
+
+  }
+//ajoute ou retire la colonne de la déesse comme objet visité
+
+  function visitMonument(e) {
+    const copyOf1 = arrayOfLocations1.slice();
+    copyOf1.find(elt => elt.id == e.target.id).isVisited = ! copyOf1.find(elt => elt.id == e.target.id).isVisited;
+    setArrayofLocations1(copyOf1);
+    setCurrentLocationList(arrayOfLocations1);
 
   }
 
+//ajoute ou retire le lieu supp de la deuxieme liste 
+
+  function addOrRemoveLocation() {
+    const copyOf2 = arrayOfLocations2.slice();
+    const newLocation = extraLocation;
+    if(extraLocation.id === ''){
+      const index = extraLocation.length;
+      newLocation.id = index;
+      copyOf2.push(newLocation);
+      setArrayofLocations2(copyOf2);
+    }
+    else{
+     const index =  copyOf2.findIndex(elt => elt.id === extraLocation.id);
+     if(index != -1){
+      copyOf2.splice(index, 1);
+      setArrayofLocations2(copyOf2);
+
+     }
+
+    }
 
 
-
-
-
-
+  }
 
   return (
     <div className="App">
       <InputSelect handleValueChange={handleValueChange} />
+      <span><Button onClick={visitMonument} id={1} texte='ajout colonne dans visités'/></span>
       <MapContainer center={
-        originalCenter} zoom={15} scrollWheelZoom={false} className='leaflet-wrapper'>
+        currentMapCenter} zoom={15} scrollWheelZoom={false} className='leaflet-wrapper'>
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
+        <FlyTo latlng={currentMapCenter} />
         <LocationMarker />
         {currentMarkers}
+        
       </MapContainer>
 
 
