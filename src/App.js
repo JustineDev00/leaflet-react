@@ -171,7 +171,6 @@ function App() {
         break;
     }
   
-<<<<<<< HEAD
 
   }
 //ajoute ou retire la colonne de la déesse comme objet visité
@@ -181,8 +180,6 @@ function App() {
     copyOf1.find(elt => elt.id == e.target.id).isVisited = ! copyOf1.find(elt => elt.id == e.target.id).isVisited;
     setArrayofLocations1(copyOf1);
     setCurrentLocationList(arrayOfLocations1);
-=======
->>>>>>> 578455dbc24ecda1e6ccb5108f028c67755d6e34
 
   }
 
@@ -207,12 +204,9 @@ function App() {
 
     }
 
-<<<<<<< HEAD
 
   }
 
-=======
->>>>>>> 578455dbc24ecda1e6ccb5108f028c67755d6e34
   return (
     <div className="App">
       <InputSelect handleValueChange={handleValueChange} />
