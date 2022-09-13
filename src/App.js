@@ -4,15 +4,13 @@ import './App.css';
 import { MapContainer, Marker, Popup, useMapEvent, useMapEvents } from 'react-leaflet';
 import { TileLayer } from 'react-leaflet';
 import { useMap } from 'react-leaflet';
-import { map } from 'leaflet';
 import { useEffect, useRef, useState } from 'react';
 import CustMarker from './Marker/Marker';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle';
 import InputSelect from './InputSelect/InputSelect';
-import useStateWithCallback from 'use-state-with-callback';
 import Button from './Button/Button';
-import { flushSync } from 'react-dom';
+
 
 
 
@@ -24,16 +22,7 @@ function App() {
  
  
  
-  function FlyTo({latlng}){
-    const map = useMap();
-    if(currentMapCenter == null){
-      map.flyTo(originalCenter);
-    }
-    else{
-      map.flyTo(latlng);
-      return;
-    }
-  }
+
 
 
 
@@ -93,6 +82,23 @@ function App() {
     description : `Résidence des moines cisterciens étudiants à l'université de Paris du XIIIe siècle à la Révolution Française`,
     position : [48.84886516046273, 2.3520445289133405],
     isVisited : true
+  }
+
+
+  //calculs de l'harversine
+
+
+
+
+  function FlyTo({latlng}){
+    const map = useMap();
+    if(currentMapCenter == null){
+      map.flyTo(originalCenter);
+    }
+    else{
+      map.flyTo(latlng);
+      return;
+    }
   }
 
 
