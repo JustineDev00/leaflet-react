@@ -10,21 +10,13 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle';
 import InputSelect from './InputSelect/InputSelect';
 import Button from './Button/Button';
-
-
-
+import haversineDistance from 'haversine-distance';
+import { LatLngBounds, LatLng } from 'leaflet';
 
 
 function App() {
 
   const originalCenter = [51.505, -0.09];
- 
- 
- 
- 
-
-
-
 
 
   //liste des objets-lieux
@@ -77,25 +69,58 @@ function App() {
 
 
   const extraLocation = {
-    id : 4,
-    name : 'collège des Bernardins',
-    description : `Résidence des moines cisterciens étudiants à l'université de Paris du XIIIe siècle à la Révolution Française`,
-    position : [48.84886516046273, 2.3520445289133405],
-    isVisited : true
+    id: 4,
+    name: 'collège des Bernardins',
+    description: `Résidence des moines cisterciens étudiants à l'université de Paris du XIIIe siècle à la Révolution Française`,
+    position: [48.84886516046273, 2.3520445289133405],
+    isVisited: true
   }
 
 
   //calculs de l'harversine
+  // const a = objectCollection1[0].position;
+  // const b = objectCollection1[1].position;
+  // console.log(haversineDistance(a, b));  //OK
+
+  //trouver les 2 points les plus éloignés parmi les 3
 
 
 
+  function findObjectCollectionCenter(anyCollection) {
+    let corner1 = ''
+    let corner2 = ''
+    let maxDistance = 0;
+    for (let index = 0; index < anyCollection.length; index++) {
+      const a = anyCollection[index];
+      for (let index = 0; index < anyCollection.length; index++) {
+        const b = anyCollection[index];
+        let distance = haversineDistance(a.position, b.position);
+        if (distance >= maxDistance) {
+          maxDistance = distance;
+          corner1 = [a.position[0], a.position[1]];
+          corner2 = [b.position[0], b.position[1]];
+        }
+      }
+    }
+    console.log(maxDistance);
+    const bounds = new LatLngBounds(corner1, corner2)
+    console.log(bounds);
+    return bounds;
 
-  function FlyTo({latlng}){
+  }
+
+
+  //calcul OK (enfin!!!)
+findObjectCollectionCenter(objectCollection1);
+findObjectCollectionCenter(objectCollection2);
+
+
+  function FlyTo({ latlng }) {
     const map = useMap();
-    if(currentMapCenter == null){
+    if (currentMapCenter == null) {
       map.flyTo(originalCenter);
     }
-    else{
+    else {
       map.flyTo(latlng);
       return;
     }
@@ -103,13 +128,14 @@ function App() {
 
 
   function getLocationListCenter(locationArray) {
-    if(locationArray.length === 0){
+    if (locationArray.length === 0) {
       return;
     }
-    else{
+    else {
       const center = locationArray.find(elt => elt.id === 1).position;
       return center;
-    }}
+    }
+  }
 
   function mapLocationsArray(locationArray) {
     if (locationArray.length === 0) {
@@ -154,12 +180,12 @@ function App() {
   useEffect(() => {
     // let locationArray = [];
     // locationArray = objectCollection1;
-    
+
     setCurrentMarkers(mapLocationsArray(currentLocationList));
     setCurrentMapCenter(getLocationListCenter(currentLocationList));
-    
 
-  },[currentLocationList]);
+
+  }, [currentLocationList]);
 
 
 
@@ -170,41 +196,41 @@ function App() {
       case '1':
         setCurrentLocationList(arrayOfLocations1.slice());
         break;
-        case '2':
-          setCurrentLocationList(arrayOfLocations2.current.slice());
-          break;
+      case '2':
+        setCurrentLocationList(arrayOfLocations2.current.slice());
+        break;
       default:
         break;
     }
-  
+
 
   }
-//ajoute ou retire la colonne de la déesse comme objet visité
+  //ajoute ou retire la colonne de la déesse comme objet visité
 
   function visitMonument(e) {
     const copyOf1 = arrayOfLocations1.slice();
-    copyOf1.find(elt => elt.id == e.target.id).isVisited = ! copyOf1.find(elt => elt.id == e.target.id).isVisited;
+    copyOf1.find(elt => elt.id == e.target.id).isVisited = !copyOf1.find(elt => elt.id == e.target.id).isVisited;
     setArrayofLocations1(copyOf1);
     setCurrentLocationList(arrayOfLocations1);
 
   }
 
-//ajoute ou retire le lieu supp de la deuxieme liste 
+  //ajoute ou retire le lieu supp de la deuxieme liste 
 
   function addOrRemoveLocation() {
     const copyOf2 = arrayOfLocations2.current.slice();
     let array = []
     const index = copyOf2.indexOf(copyOf2.find(elt => elt.id === extraLocation.id));
-    if(index === -1){
-    copyOf2.push(extraLocation);
+    if (index === -1) {
+      copyOf2.push(extraLocation);
     }
-    else{
+    else {
       copyOf2.splice(index, 1);
     }
     array = copyOf2;
     arrayOfLocations2.current = array;
-    
-  
+
+
     setCurrentMapCenter(extraLocation.position);
     setCurrentLocationList(arrayOfLocations2.current);
   }
@@ -212,8 +238,8 @@ function App() {
   return (
     <div className="App">
       <InputSelect handleValueChange={handleValueChange} />
-      <span><Button onClick={visitMonument} id={1} texte='ajout colonne dans visités'/></span>
-      <span><Button onClick={addOrRemoveLocation}  texte='ajout lieu bonus dans liste 2'/></span>
+      <span><Button onClick={visitMonument} id={1} texte='ajout colonne dans visités' /></span>
+      <span><Button onClick={addOrRemoveLocation} texte='ajout lieu bonus dans liste 2' /></span>
       <MapContainer center={
         currentMapCenter} zoom={15} scrollWheelZoom={false} className='leaflet-wrapper'>
         <TileLayer
@@ -223,7 +249,7 @@ function App() {
         <FlyTo latlng={currentMapCenter} />
         <LocationMarker />
         {currentMarkers}
-        
+
       </MapContainer>
 
 
