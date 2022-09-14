@@ -11,7 +11,7 @@ import 'bootstrap/dist/js/bootstrap.bundle';
 import InputSelect from './InputSelect/InputSelect';
 import Button from './Button/Button';
 import haversineDistance from 'haversine-distance';
-import { LatLngBounds, LatLng } from 'leaflet';
+import { LatLngBounds } from 'leaflet';
 
 
 function App() {
@@ -86,7 +86,7 @@ function App() {
 
 
 
-  function findObjectCollectionCenter(anyCollection) {
+  function setBounds(anyCollection) {
     let corner1 = ''
     let corner2 = ''
     let maxDistance = 0;
@@ -111,31 +111,57 @@ function App() {
 
 
   //calcul OK (enfin!!!)
-findObjectCollectionCenter(objectCollection1);
-findObjectCollectionCenter(objectCollection2);
+  setBounds(objectCollection1);
+  setBounds(objectCollection2);
 
 
-  function FlyTo({ latlng }) {
-    const map = useMap();
-    if (currentMapCenter == null) {
-      map.flyTo(originalCenter);
+
+  //obtenir le point central d'une collection d'objet
+  function setCenter(anyCollection) {
+    if (anyCollection.length == 0) {
+      setCenter(objectCollection1);
     }
     else {
-      map.flyTo(latlng);
-      return;
-    }
-  }
-
-
-  function getLocationListCenter(locationArray) {
-    if (locationArray.length === 0) {
-      return;
-    }
-    else {
-      const center = locationArray.find(elt => elt.id === 1).position;
+      const boundsObject = setBounds(anyCollection);
+      const center = boundsObject.getCenter();
       return center;
     }
   }
+
+
+  function FlyToBounds(anyCollection) {
+    const map = useMap();
+    if (anyCollection.length === 0) {
+      map.flyToBounds(setBounds(objectCollection1));
+    }
+    else {
+      map.flyToBounds(setBounds(anyCollection));
+    }
+    return;
+
+  }
+
+  // function FlyTo({ latlng }) {
+  //   const map = useMap();
+  //   if (currentMapCenter == null) {
+  //     map.flyTo(originalCenter);
+  //   }
+  //   else {
+  //     map.flyTo(latlng);
+  //     return;
+  //   }
+  // }
+
+
+  // function getLocationListCenter(locationArray) {
+  //   if (locationArray.length === 0) {
+  //     return;
+  //   }
+  //   else {
+  //     const center = locationArray.find(elt => elt.id === 1).position;
+  //     return center;
+  //   }
+  // }
 
   function mapLocationsArray(locationArray) {
     if (locationArray.length === 0) {
@@ -169,7 +195,8 @@ findObjectCollectionCenter(objectCollection2);
 
   const [currentLocationList, setCurrentLocationList] = useState([]);
   const [currentMarkers, setCurrentMarkers] = useState([]);
-  const [currentMapCenter, setCurrentMapCenter] = useState(originalCenter.slice());
+  const [currentBounds, setCurrentBounds] = useState(setBounds(objectCollection1));
+  // const [currentMapCenter, setCurrentMapCenter] = useState(originalCenter.slice());
   const [arrayOfLocations1, setArrayofLocations1] = useState(objectCollection1.slice());
   const arrayOfLocations2 = useRef(objectCollection2.slice());
 
@@ -182,10 +209,16 @@ findObjectCollectionCenter(objectCollection2);
     // locationArray = objectCollection1;
 
     setCurrentMarkers(mapLocationsArray(currentLocationList));
-    setCurrentMapCenter(getLocationListCenter(currentLocationList));
-
-
-  }, [currentLocationList]);
+    setCurrentBounds(() => {
+      if (currentLocationList.length == 0) {
+        setBounds(objectCollection1);
+      }
+      else {
+        setBounds(currentLocationList);
+      }
+    })
+  }
+    , [currentLocationList]);
 
 
 
@@ -230,9 +263,9 @@ findObjectCollectionCenter(objectCollection2);
     array = copyOf2;
     arrayOfLocations2.current = array;
 
-
-    setCurrentMapCenter(extraLocation.position);
     setCurrentLocationList(arrayOfLocations2.current);
+
+
   }
 
   return (
@@ -240,13 +273,13 @@ findObjectCollectionCenter(objectCollection2);
       <InputSelect handleValueChange={handleValueChange} />
       <span><Button onClick={visitMonument} id={1} texte='ajout colonne dans visités' /></span>
       <span><Button onClick={addOrRemoveLocation} texte='ajout lieu bonus dans liste 2' /></span>
-      <MapContainer center={
-        currentMapCenter} zoom={15} scrollWheelZoom={false} className='leaflet-wrapper'>
+      <MapContainer center={setCenter(currentLocationList)} zoom={15} scrollWheelZoom={false} fitBounds={currentBounds} className='leaflet-wrapper'>
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        <FlyTo latlng={currentMapCenter} />
+        <FlyToBounds anyCollection={currentLocationList} ></FlyToBounds>
+        {/* <FlyTo latlng={currentMapCenter} /> */}
         <LocationMarker />
         {currentMarkers}
 
