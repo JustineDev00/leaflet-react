@@ -82,31 +82,38 @@ function App() {
  
   const [arrayOfLocations1, setArrayofLocations1] = useState(objectCollection1.slice());
   const [arrayOfLocations2, setArrayofLocations2] = useState(objectCollection2.slice());
-  const [currentLocationList, setCurrentLocationList] = useState(null);
+  const [currentLocationList, setCurrentLocationList] = useState(arrayOfLocations1);
   const [currentBounds, setCurrentBounds] = useState(null);
   const [currentMapCenter, setCurrentMapCenter] = useState(null);
-
+  const [menuValue, setMenuValue] = useState(0);
 
 
 
 useEffect(() => {
+  setMenuValue('1')
   setCurrentLocationList(arrayOfLocations1);
   setCurrentBounds(setBounds(arrayOfLocations1))
   setCurrentMapCenter(setCenter(arrayOfLocations1));
 }, [])
 
 useEffect(() => {
-  setCurrentLocationList(arrayOfLocations1);
-  setCurrentBounds(setBounds(arrayOfLocations1))
-  setCurrentMapCenter(setCenter(arrayOfLocations1));
-}, [arrayOfLocations1])
-
+  switch (menuValue){
+    case '1':
+      setCurrentLocationList(arrayOfLocations1.slice());
+      
+      break;
+    case '2':
+      setCurrentLocationList(arrayOfLocations2.slice());
+      break;
+    default:
+      break;
+  }
+}, [menuValue])
 
 useEffect(() => {
-  setCurrentLocationList(arrayOfLocations2)
-  setCurrentBounds(setBounds(arrayOfLocations2))
-  setCurrentMapCenter(setCenter(arrayOfLocations2));
-}, [arrayOfLocations2])
+  setCurrentBounds(setBounds(currentLocationList));
+  setCurrentMapCenter(setCenter(currentLocationList));
+}, [currentLocationList])
   //calculs de l'harversine
   // const a = objectCollection1[0].position;
   // const b = objectCollection1[1].position;
@@ -159,28 +166,28 @@ useEffect(() => {
   }
 
 
-  function FlyToBounds(anyCollection) {
-    const map = useMap();
-    if (anyCollection.length === 0) {
-      map.flyToBounds(setBounds(objectCollection1));
-    }
-    else {
-      map.flyToBounds(setBounds(anyCollection));
-    }
-    return;
-
-  }
-
-  // function FlyTo({ latlng }) {
+  // function FlyToBounds(anyCollection) {
   //   const map = useMap();
-  //   if (currentMapCenter == null) {
-  //     map.flyTo(originalCenter);
+  //   if (anyCollection.length === 0) {
+  //     map.flyToBounds(setBounds(objectCollection1));
   //   }
   //   else {
-  //     map.flyTo(latlng);
-  //     return;
+  //     map.flyToBounds(setBounds(anyCollection));
   //   }
+  //   return;
+
   // }
+
+  function FlyTo() {
+    const map = useMap();
+    if (currentMapCenter == null) {
+      map.flyTo(setCenter(arrayOfLocations1));
+    }
+    else {
+      map.flyTo(setCenter(currentLocationList));
+      return;
+    }
+  }
 
 
   // function getLocationListCenter(locationArray) {
@@ -229,18 +236,10 @@ useEffect(() => {
 
   function handleValueChange(e) {
     console.log(`current locationlist id = ${e.target.value}`);
-    switch (e.target.value) {
-      case '1':
-        setCurrentLocationList(arrayOfLocations1.slice());
-        
-        break;
-      case '2':
-        setCurrentLocationList(arrayOfLocations2.slice());
-       
-        break;
-      default:
-        break;
-    }
+    setMenuValue(e.target.value)
+
+
+
     setCurrentBounds(setBounds(currentLocationList));
 
   }
@@ -277,7 +276,7 @@ useEffect(() => {
 
   return (
     <div className="App">
-      <InputSelect handleValueChange={handleValueChange} />
+      <InputSelect handleValueChange={handleValueChange} defaultValue={menuValue}/>
       <span><Button onClick={visitMonument} id={1} texte='ajout colonne dans visités' /></span>
       <span><Button onClick={addOrRemoveLocation} texte='ajout lieu bonus dans liste 2' /></span>
       <MapContainer center={currentMapCenter} zoom={15} scrollWheelZoom={false} className='leaflet-wrapper' bounds={currentBounds ? currentBounds : setBounds(arrayOfLocations1) } >
@@ -289,7 +288,7 @@ useEffect(() => {
         {/* <FlyTo latlng={currentMapCenter} /> */}
         <LocationMarker />
         <MapLocationsArray locationArray = {currentLocationList}/>
-
+       <FlyTo/>
       </MapContainer>
 
 
