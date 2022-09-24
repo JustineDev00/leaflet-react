@@ -17,7 +17,7 @@ import { LatLng, LatLngBounds } from 'leaflet';
 function App() {
 
   const originalCenter = [51.505, -0.09];
-
+  const padding = [50, 50]
 
   //liste des objets-lieux
   const objectCollection1 = [
@@ -191,6 +191,7 @@ useEffect(() => {
  
   function FlyToBounds() {
     const map = useMap();
+    
     if(currentBounds == null){
       map.flyToBounds(setBounds(arrayOfLocations1));
     }
@@ -263,6 +264,7 @@ useEffect(() => {
     copyOf1.find(elt => elt.id == e.target.id).isVisited = !copyOf1.find(elt => elt.id == e.target.id).isVisited;
     setArrayofLocations1(copyOf1);
     setCurrentLocationList(arrayOfLocations1);
+    setMenuValue('1');
 
   }
 
@@ -281,7 +283,7 @@ useEffect(() => {
       setArrayofLocations2(arrayOfLocations2);
     }
     setCurrentLocationList(arrayOfLocations2);
-    
+    setMenuValue('2');
 
 
   }
@@ -291,7 +293,7 @@ useEffect(() => {
       <InputSelect handleValueChange={handleValueChange} defaultValue={menuValue}/>
       <span><Button onClick={visitMonument} id={1} texte='ajout colonne dans visités' /></span>
       <span><Button onClick={addOrRemoveLocation} texte='ajout lieu bonus dans liste 2' /></span>
-      <MapContainer center={currentMapCenter} zoom={15} scrollWheelZoom={false} className='leaflet-wrapper' bounds={currentBounds ? currentBounds : setBounds(arrayOfLocations1) } >
+      <MapContainer center={currentMapCenter} zoom={10} scrollWheelZoom={false} className='leaflet-wrapper' bounds={currentBounds ? currentBounds : setBounds(arrayOfLocations1)}>
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
