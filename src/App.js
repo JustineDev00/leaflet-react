@@ -188,7 +188,20 @@ useEffect(() => {
       return;
     }
   }
+ 
+  function FlyToBounds() {
+    const map = useMap();
+    if(currentBounds == null){
+      map.flyToBounds(setBounds(arrayOfLocations1));
+    }
+    else{
+      map.flyToBounds(currentBounds);
 
+    }
+
+
+
+  }
 
   // function getLocationListCenter(locationArray) {
   //   if (locationArray.length === 0) {
@@ -256,20 +269,19 @@ useEffect(() => {
   //ajoute ou retire le lieu supp de la deuxieme liste 
 
   function addOrRemoveLocation() {
-    const copyOf2 = arrayOfLocations2.slice();
-    let array = []
-    const index = copyOf2.indexOf(copyOf2.find(elt => elt.id === extraLocation.id));
+    
+    
+    const index = arrayOfLocations2.indexOf(arrayOfLocations2.find(elt => elt.id === extraLocation.id));
     if (index === -1) {
-      copyOf2.push(extraLocation);
-      setArrayofLocations2(copyOf2);
+      arrayOfLocations2.push(extraLocation);
+      setArrayofLocations2(arrayOfLocations2);
     }
     else {
-      copyOf2.splice(index, 1);
-      setArrayofLocations2(copyOf2);
+      arrayOfLocations2.splice(index, 1);
+      setArrayofLocations2(arrayOfLocations2);
     }
+    setCurrentLocationList(arrayOfLocations2);
     
-
-    // setCurrentLocationList(arrayOfLocations2.current);
 
 
   }
@@ -285,10 +297,10 @@ useEffect(() => {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         
-        {/* <FlyTo latlng={currentMapCenter} /> */}
+        
         <LocationMarker />
         <MapLocationsArray locationArray = {currentLocationList}/>
-       <FlyTo/>
+       <FlyToBounds/>
       </MapContainer>
 
 
