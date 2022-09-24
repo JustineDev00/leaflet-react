@@ -11,7 +11,7 @@ import 'bootstrap/dist/js/bootstrap.bundle';
 import InputSelect from './InputSelect/InputSelect';
 import Button from './Button/Button';
 import haversineDistance from 'haversine-distance';
-import { LatLngBounds } from 'leaflet';
+import { LatLng, LatLngBounds } from 'leaflet';
 
 
 function App() {
@@ -76,7 +76,37 @@ function App() {
     isVisited: true
   }
 
+ 
+  // const [currentMarkers, setCurrentMarkers] = useState([]);
 
+ 
+  const [arrayOfLocations1, setArrayofLocations1] = useState(objectCollection1.slice());
+  const [arrayOfLocations2, setArrayofLocations2] = useState(objectCollection2.slice());
+  const [currentLocationList, setCurrentLocationList] = useState(null);
+  const [currentBounds, setCurrentBounds] = useState(null);
+  const [currentMapCenter, setCurrentMapCenter] = useState(null);
+
+
+
+
+useEffect(() => {
+  setCurrentLocationList(arrayOfLocations1);
+  setCurrentBounds(setBounds(arrayOfLocations1))
+  setCurrentMapCenter(setCenter(arrayOfLocations1));
+}, [])
+
+useEffect(() => {
+  setCurrentLocationList(arrayOfLocations1);
+  setCurrentBounds(setBounds(arrayOfLocations1))
+  setCurrentMapCenter(setCenter(arrayOfLocations1));
+}, [arrayOfLocations1])
+
+
+useEffect(() => {
+  setCurrentLocationList(arrayOfLocations2)
+  setCurrentBounds(setBounds(arrayOfLocations2))
+  setCurrentMapCenter(setCenter(arrayOfLocations2));
+}, [arrayOfLocations2])
   //calculs de l'harversine
   // const a = objectCollection1[0].position;
   // const b = objectCollection1[1].position;
@@ -102,24 +132,24 @@ function App() {
         }
       }
     }
-    console.log(maxDistance);
+    // console.log(maxDistance);
     const bounds = new LatLngBounds(corner1, corner2)
-    console.log(bounds);
+    // console.log(bounds);
     return bounds;
 
   }
 
 
   //calcul OK (enfin!!!)
-  setBounds(objectCollection1);
-  setBounds(objectCollection2);
+  // setBounds(objectCollection1);
+  // setBounds(objectCollection2);
 
 
 
   //obtenir le point central d'une collection d'objet
   function setCenter(anyCollection) {
-    if (anyCollection.length == 0) {
-      setCenter(objectCollection1);
+    if (!anyCollection || anyCollection.length === 0) {
+      return new LatLng(originalCenter);
     }
     else {
       const boundsObject = setBounds(anyCollection);
@@ -163,13 +193,13 @@ function App() {
   //   }
   // }
 
-  function mapLocationsArray(locationArray) {
-    if (locationArray.length === 0) {
+  function MapLocationsArray() {
+    if (!currentLocationList || currentLocationList.length === 0) {
       return;
 
     }
     else {
-      const mappedArray = locationArray.map(elt => <CustMarker key={elt.id} name={elt.name} position={elt.position} description={elt.description} isVisited={elt.isVisited}></CustMarker>);
+      const mappedArray = currentLocationList.map(elt => <CustMarker key={elt.id} name={elt.name} position={elt.position} description={elt.description} isVisited={elt.isVisited}></CustMarker>);
       return (mappedArray);
     }
 
@@ -193,32 +223,6 @@ function App() {
     )
   }
 
-  const [currentLocationList, setCurrentLocationList] = useState([]);
-  const [currentMarkers, setCurrentMarkers] = useState([]);
-  const [currentBounds, setCurrentBounds] = useState(setBounds(objectCollection1));
-  // const [currentMapCenter, setCurrentMapCenter] = useState(originalCenter.slice());
-  const [arrayOfLocations1, setArrayofLocations1] = useState(objectCollection1.slice());
-  const arrayOfLocations2 = useRef(objectCollection2.slice());
-
-
-
-
-
-  useEffect(() => {
-    // let locationArray = [];
-    // locationArray = objectCollection1;
-
-    setCurrentMarkers(mapLocationsArray(currentLocationList));
-    setCurrentBounds(() => {
-      if (currentLocationList.length == 0) {
-        setBounds(objectCollection1);
-      }
-      else {
-        setBounds(currentLocationList);
-      }
-    })
-  }
-    , [currentLocationList]);
 
 
 
@@ -228,14 +232,16 @@ function App() {
     switch (e.target.value) {
       case '1':
         setCurrentLocationList(arrayOfLocations1.slice());
+        
         break;
       case '2':
-        setCurrentLocationList(arrayOfLocations2.current.slice());
+        setCurrentLocationList(arrayOfLocations2.slice());
+       
         break;
       default:
         break;
     }
-
+    setCurrentBounds(setBounds(currentLocationList));
 
   }
   //ajoute ou retire la colonne de la déesse comme objet visité
@@ -251,19 +257,20 @@ function App() {
   //ajoute ou retire le lieu supp de la deuxieme liste 
 
   function addOrRemoveLocation() {
-    const copyOf2 = arrayOfLocations2.current.slice();
+    const copyOf2 = arrayOfLocations2.slice();
     let array = []
     const index = copyOf2.indexOf(copyOf2.find(elt => elt.id === extraLocation.id));
     if (index === -1) {
       copyOf2.push(extraLocation);
+      setArrayofLocations2(copyOf2);
     }
     else {
       copyOf2.splice(index, 1);
+      setArrayofLocations2(copyOf2);
     }
-    array = copyOf2;
-    arrayOfLocations2.current = array;
+    
 
-    setCurrentLocationList(arrayOfLocations2.current);
+    // setCurrentLocationList(arrayOfLocations2.current);
 
 
   }
@@ -273,15 +280,15 @@ function App() {
       <InputSelect handleValueChange={handleValueChange} />
       <span><Button onClick={visitMonument} id={1} texte='ajout colonne dans visités' /></span>
       <span><Button onClick={addOrRemoveLocation} texte='ajout lieu bonus dans liste 2' /></span>
-      <MapContainer center={setCenter(currentLocationList)} zoom={15} scrollWheelZoom={false} fitBounds={currentBounds} className='leaflet-wrapper'>
+      <MapContainer center={currentMapCenter} zoom={15} scrollWheelZoom={false} className='leaflet-wrapper' bounds={currentBounds ? currentBounds : setBounds(arrayOfLocations1) } >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        <FlyToBounds anyCollection={currentLocationList} ></FlyToBounds>
+        
         {/* <FlyTo latlng={currentMapCenter} /> */}
         <LocationMarker />
-        {currentMarkers}
+        <MapLocationsArray locationArray = {currentLocationList}/>
 
       </MapContainer>
 
