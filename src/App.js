@@ -134,8 +134,8 @@ useEffect(() => {
         let distance = haversineDistance(a.position, b.position);
         if (distance >= maxDistance) {
           maxDistance = distance;
-          corner1 = [a.position[0], a.position[1]];
-          corner2 = [b.position[0], b.position[1]];
+          corner1 = a.position;
+          corner2 = b.position;
         }
       }
     }
@@ -193,10 +193,10 @@ useEffect(() => {
     const map = useMap();
     
     if(currentBounds == null){
-      map.flyToBounds(setBounds(arrayOfLocations1));
+      map.flyToBounds(setBounds(arrayOfLocations1), {padding : [20, 20], maxZoom : 15});
     }
     else{
-      map.flyToBounds(currentBounds);
+      map.flyToBounds(currentBounds, {padding : [20, 20], maxZoom : 15});
 
     }
 
@@ -293,7 +293,7 @@ useEffect(() => {
       <InputSelect handleValueChange={handleValueChange} defaultValue={menuValue}/>
       <span><Button onClick={visitMonument} id={1} texte='ajout colonne dans visités' /></span>
       <span><Button onClick={addOrRemoveLocation} texte='ajout lieu bonus dans liste 2' /></span>
-      <MapContainer center={currentMapCenter} zoom={10} scrollWheelZoom={false} className='leaflet-wrapper' bounds={currentBounds ? currentBounds : setBounds(arrayOfLocations1)}>
+      <MapContainer center={currentMapCenter}  scrollWheelZoom={false} className='leaflet-wrapper' bounds={currentBounds ? currentBounds : setBounds(arrayOfLocations1)} boundsOptions = {{padding : [20, 20], maxZoom : 9}}>
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
